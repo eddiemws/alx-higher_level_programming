@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import randomm
+import random
 number = random.randint(-10000, 10000)
 exe = 0
 if number < 0:
