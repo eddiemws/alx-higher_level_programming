@@ -1,24 +1,40 @@
 #!/usr/bin/python3
 """
-Lists all State objects and corresponding City objects contained in the DB
+Lists all State objects and corresponding City objects contained in the database hbtn_0e_101_usa.
+Usage: ./101-relationship_states_cities_list.py <mysql username> <mysql password> <database name>
 """
-import sys
-from relationship_state import Base, State
-from relationship_city import City
+
+from sys import argv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from relationship_state import State
+from relationship_city import City
 
+if __name__ == "__main__":
+    if len(argv) != 4:
+        print("Usage: ./101-relationship_states_cities_list.py <mysql username> <mysql password> <database name>")
+        exit(1)
 
-if __name__ == '__main__':
-engine = create_engine('mysql+mysqldb://{}:{}@localhost:3306/{}'.format(sys.argv[1], sys.argv[2], sys.argv[3]),pool_pre_ping=True)
-Base.metadata.create_all(engine)
+    username = argv[1]
+    password = argv[2]
+    db_name = argv[3]
 
-Session = sessionmaker(bind=engine)
-session = Session()
+    # Create an engine and connect to the MySQL server
+    engine = create_engine(f'mysql+mysqldb://{username}:{password}@localhost:3306/{db_name}')
 
-st = session.query(State).outerjoin(City).order_by(State.id, City.id).all()
+    # Create a configured "Session" class
+    Session = sessionmaker(bind=engine)
+    # Create a Session
+    session = Session()
 
-for state in st:
-print("{}: {}".format(state.id, state.name))
-for city in state.cities:
-print("    {}: {}".format(city.id, city.name))
+    # Query all State objects, sorted by states.id, and use the cities relationship
+    states = session.query(State).order_by(State.id).all()
+
+    # Print results
+    for state in states:
+        print(f"{state.id}: {state.name}")
+        for city in state.cities:
+            print(f"\t{city.id}: {city.name}")
+
+    # Close session
+    session.close()
